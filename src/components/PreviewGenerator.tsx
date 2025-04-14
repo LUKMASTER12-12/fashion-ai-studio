@@ -156,7 +156,9 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
     const uniqueId = Math.random().toString(36).substring(2, 15);
     const newShareUrl = `https://example.com/share/${uniqueId}`;
     setShareUrl(newShareUrl);
-    setEmbedCode(`<iframe src="${newShareUrl}" width="800" height="600" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>`);
+    setEmbedCode(
+      `<iframe src="${newShareUrl}" width="800" height="600" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>`,
+    );
     setIsDialogOpen(true);
   };
 
@@ -584,7 +586,7 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
                       <div className="relative">
                         <Input
                           id="embed-code"
-                          value={`<iframe src="${shareUrl || 'https://example.com/embed/photoshoot'}" width="800" height="600" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>`}
+                          value={`<iframe src="${shareUrl || "https://example.com/embed/photoshoot"}" width="800" height="600" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>`}
                           readOnly
                         />
                         <Button
@@ -593,7 +595,7 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
                           className="absolute right-2 top-1/2 transform -translate-y-1/2"
                           onClick={() => {
                             navigator.clipboard.writeText(
-                              `<iframe src="${shareUrl || 'https://example.com/embed/photoshoot'}" width="800" height="600" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>`
+                              `<iframe src="${shareUrl || "https://example.com/embed/photoshoot"}" width="800" height="600" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>`,
                             );
                             alert("Embed code copied to clipboard!");
                           }}
@@ -602,13 +604,15 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
                         </Button>
                       </div>
                     </div>
-                    
+
                     <div className="space-y-2 mt-4">
                       <Label htmlFor="direct-link">Direct Link</Label>
                       <div className="relative">
                         <Input
                           id="direct-link"
-                          value={shareUrl || 'https://example.com/share/photoshoot'}
+                          value={
+                            shareUrl || "https://example.com/share/photoshoot"
+                          }
                           readOnly
                         />
                         <Button
@@ -617,7 +621,8 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
                           className="absolute right-2 top-1/2 transform -translate-y-1/2"
                           onClick={() => {
                             navigator.clipboard.writeText(
-                              shareUrl || 'https://example.com/share/photoshoot'
+                              shareUrl ||
+                                "https://example.com/share/photoshoot",
                             );
                             alert("Link copied to clipboard!");
                           }}
@@ -630,23 +635,33 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
                     <div className="space-y-2 mt-4">
                       <Label>Integration Options</Label>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <Button variant="outline" className="w-full" onClick={() => {
-                          const jsonData = {
-                            images: generatedImages,
-                            model: activeModel.name,
-                            background: selectedBackground.name,
-                            products: uploadedProducts.map(p => p.name)
-                          };
-                          navigator.clipboard.writeText(JSON.stringify(jsonData, null, 2));
-                          alert("JSON data copied to clipboard!");
-                        }}>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => {
+                            const jsonData = {
+                              images: generatedImages,
+                              model: activeModel.name,
+                              background: selectedBackground.name,
+                              products: uploadedProducts.map((p) => p.name),
+                            };
+                            navigator.clipboard.writeText(
+                              JSON.stringify(jsonData, null, 2),
+                            );
+                            alert("JSON data copied to clipboard!");
+                          }}
+                        >
                           <Code className="mr-2 h-4 w-4" />
                           Copy as JSON
                         </Button>
-                        <Button variant="outline" className="w-full" onClick={() => {
-                          setApiKeyRequested(true);
-                          setIsDialogOpen(true);
-                        }}>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => {
+                            setApiKeyRequested(true);
+                            setIsDialogOpen(true);
+                          }}
+                        >
                           <Code className="mr-2 h-4 w-4" />
                           Get API Access
                         </Button>
@@ -807,7 +822,10 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
                 </div>
 
                 <div className="flex justify-end gap-2 mt-6">
-                  <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsDialogOpen(false)}
+                  >
                     Close
                   </Button>
                   <Button onClick={() => handleDownload()}>Download Now</Button>
@@ -817,52 +835,75 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
               <>
                 <h3 className="text-lg font-medium">API Access Request</h3>
                 <p className="text-sm text-muted-foreground mb-4">
-                  Fill out the form below to request API access for integrating our AI photoshoot generator into your website or application.
+                  Fill out the form below to request API access for integrating
+                  our AI photoshoot generator into your website or application.
                 </p>
-                
+
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="company-name">Company Name</Label>
                     <Input id="company-name" placeholder="Your company name" />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="email">Email Address</Label>
-                    <Input id="email" type="email" placeholder="your@email.com" />
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="your@email.com"
+                    />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="use-case">Use Case</Label>
-                    <Input id="use-case" placeholder="Describe how you'll use our API" />
+                    <Input
+                      id="use-case"
+                      placeholder="Describe how you'll use our API"
+                    />
                   </div>
-                  
+
                   <div className="space-y-2">
-                    <Label htmlFor="estimated-volume">Estimated Monthly Volume</Label>
+                    <Label htmlFor="estimated-volume">
+                      Estimated Monthly Volume
+                    </Label>
                     <Select defaultValue="low">
                       <SelectTrigger id="estimated-volume">
                         <SelectValue placeholder="Select volume" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="low">Low (&lt; 1,000 images)</SelectItem>
-                        <SelectItem value="medium">Medium (1,000 - 10,000 images)</SelectItem>
-                        <SelectItem value="high">High (> 10,000 images)</SelectItem>
+                        <SelectItem value="low">
+                          Low (&lt; 1,000 images)
+                        </SelectItem>
+                        <SelectItem value="medium">
+                          Medium (1,000 - 10,000 images)
+                        </SelectItem>
+                        <SelectItem value="high">
+                          High (&gt; 10,000 images)
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
-                
+
                 <div className="flex justify-end gap-2 mt-6">
-                  <Button variant="outline" onClick={() => {
-                    setApiKeyRequested(false);
-                    setIsDialogOpen(false);
-                  }}>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setApiKeyRequested(false);
+                      setIsDialogOpen(false);
+                    }}
+                  >
                     Cancel
                   </Button>
-                  <Button onClick={() => {
-                    alert("Thank you for your request! We'll be in touch with API access details shortly.");
-                    setApiKeyRequested(false);
-                    setIsDialogOpen(false);
-                  }}>
+                  <Button
+                    onClick={() => {
+                      alert(
+                        "Thank you for your request! We'll be in touch with API access details shortly.",
+                      );
+                      setApiKeyRequested(false);
+                      setIsDialogOpen(false);
+                    }}
+                  >
                     Submit Request
                   </Button>
                 </div>

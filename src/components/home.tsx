@@ -203,9 +203,11 @@ export default function Home() {
                       <span className="text-sm text-muted-foreground">
                         {project.images} images
                       </span>
-                      <Button variant="outline" size="sm">
-                        View
-                      </Button>
+                      <Link to={`/project/${project.id}`}>
+                        <Button variant="outline" size="sm">
+                          View
+                        </Button>
+                      </Link>
                     </CardFooter>
                   </Card>
                 ))}
