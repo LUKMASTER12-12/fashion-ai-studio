@@ -15,6 +15,7 @@ const SubscriptionPage = lazy(() => import("./components/SubscriptionPage"));
 const DashboardSubscriptionPage = lazy(
   () => import("./components/DashboardSubscriptionPage"),
 );
+const LandingPage = lazy(() => import("./components/LandingPage"));
 
 // Auth pages
 const LoginPage = lazy(() => import("./components/auth/LoginPage"));
@@ -40,7 +41,9 @@ function App() {
         {import.meta.env.VITE_TEMPO === "true" && useRoutes(routes)}
 
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/try-on" element={<LandingPage />} />
+          <Route path="/dashboard" element={<Home />} />
           <Route path="/create" element={<CreatePage />} />
           <Route path="/project/:id" element={<ProjectDetailsPage />} />
           <Route path="/edit/:id" element={<CreatePage />} />

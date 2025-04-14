@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -28,7 +28,11 @@ import {
   ZoomIn,
   Move,
   Check,
+  Shirt,
+  Image as ImageIcon,
+  RefreshCw,
 } from "lucide-react";
+import { performTryOn } from "@/services/falService";
 import { motion } from "framer-motion";
 
 interface PreviewGeneratorProps {
@@ -126,11 +130,21 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
     message?: string;
   }>({ platform: "", status: "idle" });
 
+  // Try-on feature states
+  const [isTryOnMode, setIsTryOnMode] = useState(false);
+  const [modelImageUrl, setModelImageUrl] = useState("");
+  const [garmentImageUrl, setGarmentImageUrl] = useState("");
+  const [tryOnResult, setTryOnResult] = useState<string | null>(null);
+  const [isTryOnLoading, setIsTryOnLoading] = useState(false);
+  const [tryOnError, setTryOnError] = useState<string | null>(null);
+
   const handleGenerate = async () => {
     setIsGenerating(true);
     setError(null);
 
     try {
+      console.log("Starting image generation with model:", activeModel.name);
+
       // In a real implementation, this would be an API call to an AI service
       // For now, we'll simulate the API call with a timeout
       await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -142,6 +156,8 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
         `https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=800&q=80&model=${activeModel.id}`,
         `https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=800&q=80&model=${activeModel.id}`,
       ];
+
+      console.log("Generated image URLs:", generatedImageUrls);
 
       // Save to localStorage for persistence
       try {
@@ -160,6 +176,7 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
             products: uploadedProducts.map((p) => p.id),
           }),
         );
+        console.log("Saved generation settings to localStorage");
       } catch (error) {
         console.error("Error saving generated images to localStorage:", error);
       }
@@ -177,6 +194,57 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
       setError("Failed to generate images. Please try again.");
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleTryOn = async () => {
+    if (!modelImageUrl || !garmentImageUrl) {
+      setTryOnError("Please provide both model and garment image URLs");
+      return;
+    }
+
+    setTryOnLoading(true);
+    setTryOnError(null);
+    setTryOnResult(null);
+
+    try {
+      console.log("Starting try-on with:", { modelImageUrl, garmentImageUrl });
+
+      const result = await performTryOn({
+        modelImage: modelImageUrl,
+        garmentImage: garmentImageUrl,
+      });
+
+      console.log("Try-on result received:", result);
+      setTryOnResult(result.image);
+
+      // Add the generated image to the results
+      const newGeneratedImages = [...generatedImages, result.image];
+      setGeneratedImages(newGeneratedImages);
+
+      // Save to localStorage
+      try {
+        localStorage.setItem(
+          "generatedImages",
+          JSON.stringify(newGeneratedImages),
+        );
+        localStorage.setItem("generationTimestamp", Date.now().toString());
+        console.log("Saved generated images to localStorage");
+      } catch (error) {
+        console.error("Error saving generated images to localStorage:", error);
+      }
+
+      // Call the callback to notify parent component
+      if (onGenerationComplete) {
+        onGenerationComplete(newGeneratedImages);
+      }
+    } catch (err) {
+      console.error("Error performing try-on:", err);
+      setTryOnError(
+        "Failed to perform try-on. Please check your image URLs and try again.",
+      );
+    } finally {
+      setTryOnLoading(false);
     }
   };
 
@@ -258,6 +326,7 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
             <TabsTrigger value="preview">Preview & Adjust</TabsTrigger>
             <TabsTrigger value="results">Generated Results</TabsTrigger>
             <TabsTrigger value="export">Export Options</TabsTrigger>
+            <TabsTrigger value="tryon">Try-On Feature</TabsTrigger>
           </TabsList>
 
           {activeTab === "preview" && (
@@ -504,6 +573,156 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
               </p>
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="tryon" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Card className="overflow-hidden">
+                <CardContent className="p-6">
+                  <h2 className="text-2xl font-bold mb-6">Virtual Try-On</h2>
+                  <p className="text-muted-foreground mb-6">
+                    Enter the URLs of a model image and a garment image to see
+                    how the garment would look on the model.
+                  </p>
+
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="model-image-url"
+                        className="flex items-center gap-2"
+                      >
+                        <ImageIcon className="h-4 w-4" />
+                        Model Image URL
+                      </Label>
+                      <Input
+                        id="model-image-url"
+                        placeholder="https://example.com/model.jpg"
+                        value={modelImageUrl}
+                        onChange={(e) => setModelImageUrl(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="garment-image-url"
+                        className="flex items-center gap-2"
+                      >
+                        <Shirt className="h-4 w-4" />
+                        Garment Image URL
+                      </Label>
+                      <Input
+                        id="garment-image-url"
+                        placeholder="https://example.com/garment.jpg"
+                        value={garmentImageUrl}
+                        onChange={(e) => setGarmentImageUrl(e.target.value)}
+                      />
+                    </div>
+
+                    {tryOnError && (
+                      <div className="bg-destructive/10 text-destructive p-3 rounded-md text-sm">
+                        {tryOnError}
+                      </div>
+                    )}
+
+                    <Button
+                      onClick={handleTryOn}
+                      disabled={
+                        isTryOnLoading || !modelImageUrl || !garmentImageUrl
+                      }
+                      className="w-full"
+                    >
+                      {isTryOnLoading ? (
+                        <>
+                          <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        "Generate Try-On Image"
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-6">
+              <Card>
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-medium mb-4">Result Preview</h3>
+                  {tryOnResult ? (
+                    <div className="space-y-4">
+                      <img
+                        src={tryOnResult}
+                        alt="Try-on result"
+                        className="w-full h-[300px] object-contain rounded-md border"
+                      />
+                      <div className="flex justify-between">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setActiveTab("results");
+                          }}
+                        >
+                          View in Results
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownload(tryOnResult)}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-[300px] bg-muted/30 rounded-md border border-dashed">
+                      {isTryOnLoading ? (
+                        <>
+                          <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground mb-2" />
+                          <p className="text-muted-foreground">
+                            Processing your request...
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
+                          <p className="text-muted-foreground">
+                            Try-on result will appear here
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
+                  <h3 className="text-lg font-medium mb-4">How It Works</h3>
+                  <ol className="space-y-2 text-sm text-muted-foreground list-decimal pl-4">
+                    <li>
+                      Enter the URL of a model image (person wearing neutral
+                      clothing)
+                    </li>
+                    <li>
+                      Enter the URL of a garment image (clothing item on plain
+                      background)
+                    </li>
+                    <li>
+                      Click Generate to see the garment virtually fitted on the
+                      model
+                    </li>
+                    <li>
+                      Results are added to your generated images collection
+                    </li>
+                  </ol>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="export" className="space-y-6">
