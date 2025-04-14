@@ -11,13 +11,25 @@ type Step = "upload" | "model" | "preview" | "export";
 
 interface PhotoshootCreatorProps {
   onComplete?: (data: any) => void;
+  initialData?: {
+    title?: string;
+    uploadedImages?: File[];
+    selectedModels?: string[];
+    selectedBackgrounds?: string[];
+    generatedImages?: string[];
+  };
 }
 
 const PhotoshootCreator = ({
   onComplete = () => {},
+  initialData,
 }: PhotoshootCreatorProps) => {
-  const [currentStep, setCurrentStep] = useState<Step>("upload");
-  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const [currentStep, setCurrentStep] = useState<Step>(
+    initialData?.generatedImages?.length ? "export" : "upload",
+  );
+  const [uploadedImages, setUploadedImages] = useState<File[]>(
+    initialData?.uploadedImages || [],
+  );
   const [uploadedProductsData, setUploadedProductsData] = useState<
     Array<{
       id: string;
@@ -25,9 +37,18 @@ const PhotoshootCreator = ({
       image: string;
     }>
   >([]);
-  const [selectedModels, setSelectedModels] = useState<string[]>([]);
-  const [selectedBackgrounds, setSelectedBackgrounds] = useState<string[]>([]);
-  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+  const [selectedModels, setSelectedModels] = useState<string[]>(
+    initialData?.selectedModels || [],
+  );
+  const [selectedBackgrounds, setSelectedBackgrounds] = useState<string[]>(
+    initialData?.selectedBackgrounds || [],
+  );
+  const [generatedImages, setGeneratedImages] = useState<string[]>(
+    initialData?.generatedImages || [],
+  );
+  const [projectTitle, setProjectTitle] = useState<string>(
+    initialData?.title || "New Photoshoot",
+  );
 
   const steps: { id: Step; label: string }[] = [
     { id: "upload", label: "Upload Products" },
@@ -85,7 +106,9 @@ const PhotoshootCreator = ({
 
   return (
     <div className="w-full max-w-7xl mx-auto bg-background p-6 rounded-xl shadow-sm">
-      <h1 className="text-2xl font-bold mb-6">Create New Photoshoot</h1>
+      <h1 className="text-2xl font-bold mb-6">
+        {initialData ? "Edit Photoshoot" : "Create New Photoshoot"}
+      </h1>
 
       <div className="mb-8">
         <Tabs value={currentStep} className="w-full">

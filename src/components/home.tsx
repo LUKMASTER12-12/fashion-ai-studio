@@ -56,6 +56,51 @@ export default function Home() {
       thumbnail:
         "https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=400&q=80",
     },
+    {
+      id: 5,
+      title: "Spring Lookbook",
+      date: "3 days ago",
+      images: 10,
+      thumbnail:
+        "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&q=80",
+    },
+    {
+      id: 6,
+      title: "Denim Collection",
+      date: "2 weeks ago",
+      images: 8,
+      thumbnail:
+        "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&q=80",
+    },
+  ];
+
+  // All projects data
+  const allProjects = [
+    ...recentProjects,
+    {
+      id: 7,
+      title: "Holiday Special",
+      date: "2 months ago",
+      images: 14,
+      thumbnail:
+        "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&q=80",
+    },
+    {
+      id: 8,
+      title: "Sportswear Line",
+      date: "3 months ago",
+      images: 9,
+      thumbnail:
+        "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=400&q=80",
+    },
+    {
+      id: 9,
+      title: "Autumn Collection",
+      date: "5 months ago",
+      images: 11,
+      thumbnail:
+        "https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&q=80",
+    },
   ];
 
   // Mock stats
@@ -215,13 +260,35 @@ export default function Home() {
             </TabsContent>
 
             <TabsContent value="all">
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Image className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">All your projects</h3>
-                <p className="text-muted-foreground mb-4">
-                  View and manage all your photoshoot projects in one place.
-                </p>
-                <Button variant="outline">View All Projects</Button>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {allProjects.map((project) => (
+                  <Card key={project.id} className="overflow-hidden">
+                    <div className="aspect-video w-full overflow-hidden">
+                      <img
+                        src={project.thumbnail}
+                        alt={project.title}
+                        className="w-full h-full object-cover transition-transform hover:scale-105"
+                      />
+                    </div>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-lg">{project.title}</CardTitle>
+                      <CardDescription className="flex items-center">
+                        <Clock className="mr-1 h-3 w-3" />
+                        {project.date}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardFooter className="pt-0 flex justify-between">
+                      <span className="text-sm text-muted-foreground">
+                        {project.images} images
+                      </span>
+                      <Link to={`/project/${project.id}`}>
+                        <Button variant="outline" size="sm">
+                          View
+                        </Button>
+                      </Link>
+                    </CardFooter>
+                  </Card>
+                ))}
               </div>
             </TabsContent>
           </Tabs>

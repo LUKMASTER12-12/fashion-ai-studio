@@ -9,6 +9,22 @@ const ProjectDetailsPage = lazy(
   () => import("./components/ProjectDetailsPage"),
 );
 const NotFoundPage = lazy(() => import("./components/NotFoundPage"));
+const ProfilePage = lazy(() => import("./components/ProfilePage"));
+const SettingsPage = lazy(() => import("./components/SettingsPage"));
+const SubscriptionPage = lazy(() => import("./components/SubscriptionPage"));
+const DashboardSubscriptionPage = lazy(
+  () => import("./components/DashboardSubscriptionPage"),
+);
+
+// Auth pages
+const LoginPage = lazy(() => import("./components/auth/LoginPage"));
+const RegisterPage = lazy(() => import("./components/auth/RegisterPage"));
+const ForgotPasswordPage = lazy(
+  () => import("./components/auth/ForgotPasswordPage"),
+);
+const ResetPasswordPage = lazy(
+  () => import("./components/auth/ResetPasswordPage"),
+);
 
 function App() {
   return (
@@ -28,6 +44,19 @@ function App() {
           <Route path="/create" element={<CreatePage />} />
           <Route path="/project/:id" element={<ProjectDetailsPage />} />
           <Route path="/edit/:id" element={<CreatePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/subscription" element={<SubscriptionPage />} />
+          <Route
+            path="/dashboard/subscription"
+            element={<DashboardSubscriptionPage />}
+          />
+
+          {/* Auth Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Add this before the catchall route to allow Tempo to handle its routes */}
           {import.meta.env.VITE_TEMPO === "true" && (

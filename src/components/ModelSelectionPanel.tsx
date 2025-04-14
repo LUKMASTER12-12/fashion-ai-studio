@@ -51,11 +51,26 @@ const ModelSelectionPanel = ({
   const [selectedEthnicity, setSelectedEthnicity] = useState<string>("all");
   const [selectedBodyType, setSelectedBodyType] = useState<string>("all");
   const [selectedStyle, setSelectedStyle] = useState<string>("all");
-  const [selectedModels, setSelectedModels] = useState<string[]>(
-    initialSelectedModels,
-  );
+  const [selectedModels, setSelectedModels] = useState<string[]>(() => {
+    // Try to load from localStorage first, then fall back to props
+    try {
+      const saved = localStorage.getItem("selectedModels");
+      return saved ? JSON.parse(saved) : initialSelectedModels;
+    } catch {
+      return initialSelectedModels;
+    }
+  });
+
   const [selectedBackgrounds, setSelectedBackgrounds] = useState<string[]>(
-    initialSelectedBackgrounds,
+    () => {
+      // Try to load from localStorage first, then fall back to props
+      try {
+        const saved = localStorage.getItem("selectedBackgrounds");
+        return saved ? JSON.parse(saved) : initialSelectedBackgrounds;
+      } catch {
+        return initialSelectedBackgrounds;
+      }
+    },
   );
   const [activeTab, setActiveTab] = useState<"models" | "backgrounds">(
     "models",
@@ -278,6 +293,17 @@ const ModelSelectionPanel = ({
   };
 
   const handleContinue = () => {
+    // Save selections to localStorage for persistence
+    try {
+      localStorage.setItem("selectedModels", JSON.stringify(selectedModels));
+      localStorage.setItem(
+        "selectedBackgrounds",
+        JSON.stringify(selectedBackgrounds),
+      );
+    } catch (error) {
+      console.error("Error saving selections to localStorage:", error);
+    }
+
     onSelectionComplete(selectedModels, selectedBackgrounds);
   };
 

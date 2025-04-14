@@ -13,18 +13,25 @@ interface UploadPanelProps {
   onUploadComplete?: (images: UploadedImage[]) => void;
   maxImages?: number;
   initialFiles?: UploadedImage[];
+  allowedFileTypes?: string[];
 }
 
 interface UploadedImage {
   id: string;
   file: File;
   preview: string;
+  metadata?: {
+    size: number;
+    type: string;
+    lastModified: number;
+  };
 }
 
 const UploadPanel = ({
   onUploadComplete = () => {},
   maxImages = 10,
   initialFiles = [],
+  allowedFileTypes = ["image/jpeg", "image/png", "image/webp"],
 }: UploadPanelProps) => {
   const [uploadedImages, setUploadedImages] =
     useState<UploadedImage[]>(initialFiles);
@@ -54,16 +61,25 @@ const UploadPanel = ({
     const newImages: UploadedImage[] = [];
 
     Array.from(files).forEach((file) => {
-      // Only accept image files
-      if (!file.type.startsWith("image/")) {
-        setError("Only image files are accepted");
+      // Check if file type is allowed
+      if (!allowedFileTypes.includes(file.type)) {
+        setError(
+          `Only ${allowedFileTypes.map((type) => type.replace("image/", "")).join(", ")} files are accepted`,
+        );
         return;
       }
 
       const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       const preview = URL.createObjectURL(file);
 
-      newImages.push({ id, file, preview });
+      // Add metadata for better tracking
+      const metadata = {
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified,
+      };
+
+      newImages.push({ id, file, preview, metadata });
     });
 
     setUploadedImages((prev) => [...prev, ...newImages]);
@@ -189,8 +205,16 @@ const UploadPanel = ({
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
-                      <div className="p-2 text-xs truncate">
-                        {image.file.name}
+                      <div className="p-2 space-y-1">
+                        <div className="text-xs truncate font-medium">
+                          {image.file.name}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {image.metadata?.size
+                            ? (image.metadata.size / 1024 / 1024).toFixed(2) +
+                              " MB"
+                            : "Unknown size"}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

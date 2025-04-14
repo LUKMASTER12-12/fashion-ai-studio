@@ -103,7 +103,15 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
   const [zoomLevel, setZoomLevel] = useState(50);
   const [rotation, setRotation] = useState(0);
   const [position, setPosition] = useState({ x: 50, y: 50 });
-  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+  const [generatedImages, setGeneratedImages] = useState<string[]>(() => {
+    // Try to load from localStorage first
+    try {
+      const saved = localStorage.getItem("generatedImages");
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [isGenerating, setIsGenerating] = useState(false);
   const [exportFormat, setExportFormat] = useState("jpg");
   const [exportResolution, setExportResolution] = useState("high");
@@ -134,6 +142,27 @@ const PreviewGenerator: React.FC<PreviewGeneratorProps> = ({
         `https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=800&q=80&model=${activeModel.id}`,
         `https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=800&q=80&model=${activeModel.id}`,
       ];
+
+      // Save to localStorage for persistence
+      try {
+        localStorage.setItem(
+          "generatedImages",
+          JSON.stringify(generatedImageUrls),
+        );
+        localStorage.setItem("generationTimestamp", Date.now().toString());
+        localStorage.setItem(
+          "generationSettings",
+          JSON.stringify({
+            modelId: activeModel.id,
+            zoomLevel,
+            rotation,
+            position,
+            products: uploadedProducts.map((p) => p.id),
+          }),
+        );
+      } catch (error) {
+        console.error("Error saving generated images to localStorage:", error);
+      }
 
       setGeneratedImages(generatedImageUrls);
 
