@@ -25,7 +25,7 @@ AI Fashion Studio is a revolutionary SaaS platform that helps fashion brands cre
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/yourusername/ai-fashion-studio.git
+   git clone https://github.com/onwp/fashion-ai-studio.git
    cd ai-fashion-studio
    ```
 
